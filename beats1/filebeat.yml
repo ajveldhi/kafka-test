@@ -1,0 +1,37 @@
+filebeat.prospectors:
+- type: log
+  enabled: true
+  tags:
+    - netflower
+  paths:
+    - /usr/share/services/netflower/logs/netflower.log
+
+- type: log
+  tags:
+    - container-log
+  paths:
+    - '/var/lib/docker/containers/*/*.log'
+
+- type: log
+  enabled: true
+  tags:
+    - execer
+  paths:
+    - /usr/share/services/execer/logs/execer.log
+
+output.kafka:
+  # specifying filebeat to take timestamp and message fields, other wise it
+  # take the lines as json and publish to kafka
+  codec.format:
+    string: '%{[@timestamp]} %{[message]}'
+
+  # kafka
+  # 10.252.94.61 is my local machine ip address
+  # publishing to 'log' topic
+  hosts: ["172.31.25.147:9092"]
+  topic: 'log'
+  partition.round_robin:
+    reachable_only: false
+  required_acks: 1
+  compression: gzip
+  max_message_bytes: 1000000

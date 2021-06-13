@@ -1,0 +1,54 @@
+version: "3"
+services:
+  # Elasticsearch Docker Image
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.0
+    container_name: elasticsearch
+    # Make a port available to services outside of Docker
+    ports:
+      - 9200:9200
+      - 9300:9300
+    # Configures docker image to run in bridge mode network
+    networks:
+      - kafkanet
+  
+  # Kibana Docker Image
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.4.0
+    container_name: kibana
+    # Make a port available to services outside of Docker
+    ports:
+      - 5601:5601
+    # It Links kibana container & elasticsearch container to communicate
+    links:
+      - elasticsearch:elasticsearch
+    # Configures docker image to run in bridge mode network
+    networks:
+      - kafkanet
+    # You can control the order of service startup and shutdown with the depends_on option.
+    depends_on: ['elasticsearch']
+  
+  # Logstash Docker Image
+  logstash:
+    image: docker.elastic.co/logstash/logstash:6.4.0
+    container_name: logstash
+    # It Links elasticsearch container & kafkaserver container  & logstash container to communicate
+    links:
+      - elasticsearch:elasticsearch
+        #      - kafkaserver:kafkaserver
+    # Configures docker image to run in bridge mode network
+    networks:
+      - kafkanet
+    # You can control the order of service startup and shutdown with the depends_on option.
+    depends_on: ['elasticsearch']
+    #depends_on: ['elasticsearch', 'kafkaserver']
+    # ount host volumes into docker containers to supply logstash.config file
+    volumes:
+    - "./logstash.conf:/usr/share/logstash/pipeline/logstash.conf"
+
+#Use bridge network for all the container, keeping all the container in same network will simplify the communication between the container.
+networks: 
+  kafkanet:
+    driver: bridge
+
+#https://medium.com/@caysever/docker-compose-network-b86e424fad82
