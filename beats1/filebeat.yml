@@ -28,7 +28,7 @@ output.kafka:
   # kafka
   # 10.252.94.61 is my local machine ip address
   # publishing to 'log' topic
-  hosts: ["172.31.25.147:9092"]
+  hosts: ["172.31.43.87:9092"]
   topic: 'log'
   partition.round_robin:
     reachable_only: false
